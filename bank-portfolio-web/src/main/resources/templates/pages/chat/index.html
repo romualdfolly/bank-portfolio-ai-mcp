@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+<html lang="fr"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::main})}">
+
+<head>
+    <title>Assistant IA | Bank Portfolio</title>
+</head>
+
+<body>
+<main class="max-w-6xl mx-auto px-4 py-8">
+
+    <style>
+        /* Affichage des réponses Markdown */
+        .ai-content {
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+        }
+
+        .ai-content p {
+            margin-bottom: 12px;
+        }
+
+        .ai-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .ai-content h1,
+        .ai-content h2,
+        .ai-content h3 {
+            color: #f8fafc;
+            font-weight: 700;
+            margin: 20px 0 10px;
+        }
+
+        .ai-content h1 { font-size: 22px; }
+        .ai-content h2 { font-size: 18px; }
+        .ai-content h3 { font-size: 15px; }
+
+        .ai-content strong {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .ai-content ul {
+            list-style: disc;
+            padding-left: 24px;
+            margin: 12px 0;
+        }
+
+        .ai-content ol {
+            list-style: decimal;
+            padding-left: 24px;
+            margin: 12px 0;
+        }
+
+        .ai-content li {
+            margin-bottom: 6px;
+        }
+
+        /* Tableaux */
+        .ai-content table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 13px;
+            margin: 16px 0;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .ai-content th {
+            background: #1e40af;
+            color: #ffffff;
+            padding: 12px 14px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .ai-content td {
+            padding: 12px 14px;
+            border-top: 1px solid #334155;
+            color: #e2e8f0;
+        }
+
+        .ai-content tbody tr:nth-child(even) {
+            background: #334155;
+        }
+
+        .ai-content tbody tr:hover {
+            background: #3b4b64;
+        }
+
+        /* Citations et code */
+        .ai-content blockquote {
+            border-left: 3px solid #60a5fa;
+            padding: 10px 16px;
+            margin: 14px 0;
+            background: #1e293b;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .ai-content code {
+            background: #334155;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .ai-content pre {
+            background: #020617;
+            padding: 16px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 14px 0;
+        }
+
+        .ai-content pre code {
+            background: transparent;
+            padding: 0;
+        }
+
+        .ai-content hr {
+            border: 0;
+            border-top: 1px solid #475569;
+            margin: 20px 0;
+        }
+
+        .ai-content a {
+            color: #93c5fd;
+            text-decoration: underline;
+        }
+
+        #messages {
+            scrollbar-width: thin;
+            scrollbar-color: #475569 #0f172a;
+        }
+    </style>
+
+    <section class="bg-[#0f172a] rounded-2xl mt-20 overflow-hidden border border-slate-700 shadow-xl">
+
+        <!-- En-tête -->
+        <div class="flex items-center justify-between px-6 py-5 border-b border-slate-700 bg-[#172554]">
+
+            <div class="flex items-center gap-3">
+
+                <div class="w-11 h-11 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                    <i data-lucide="bot" class="w-6 h-6 text-blue-200"></i>
+                </div>
+
+                <div>
+                    <h1 class="font-bold text-white text-lg">Bank AI</h1>
+                    <p class="text-blue-200 text-xs">
+                        Votre assistant bancaire intelligent
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="flex items-center gap-2 text-emerald-400 text-xs">
+                <span class="w-2 h-2 bg-emerald-400 rounded-full"></span>
+                <span>Assistant IA</span>
+            </div>
+
+        </div>
+
+        <!-- Conversation -->
+        <div id="messages"
+             class="h-[500px] overflow-y-auto px-6 py-8 space-y-6">
+
+            <!-- Bienvenue -->
+            <div class="flex gap-3 max-w-3xl">
+
+                <div class="w-9 h-9 shrink-0 rounded-lg bg-blue-600 flex items-center justify-center">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-sm p-5">
+
+                    <p class="text-white font-semibold mb-2">
+                        Bonjour ! 👋
+                    </p>
+
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        Je suis votre assistant bancaire IA.
+                        Je peux consulter vos comptes, retrouver vos transactions
+                        et vous aider à mieux comprendre vos finances.
+                    </p>
+
+                </div>
+            </div>
+
+            <!-- Questions suggérées -->
+            <div id="suggestions" class="flex flex-wrap gap-2 pl-12">
+
+                <button type="button"
+                        data-question="Quel est le solde du compte CH001 ?"
+                        class="suggestion px-4 py-2 rounded-full border border-slate-600 text-slate-300 text-xs hover:border-blue-400 hover:text-white transition">
+                    Consulter un solde
+                </button>
+
+                <button type="button"
+                        data-question="Analyse les transactions du compte CH001 et donne-moi des conseils budgétaires."
+                        class="suggestion px-4 py-2 rounded-full border border-slate-600 text-slate-300 text-xs hover:border-blue-400 hover:text-white transition">
+                    Analyser mes transactions
+                </button>
+
+                <button type="button"
+                        data-question="Affiche-moi la liste des clients sous forme de tableau."
+                        class="suggestion px-4 py-2 rounded-full border border-slate-600 text-slate-300 text-xs hover:border-blue-400 hover:text-white transition">
+                    Liste des clients
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- Zone de saisie -->
+        <div class="border-t border-slate-700 bg-[#111c35] p-5">
+
+            <form id="chatForm"
+                  class="flex items-center gap-3 bg-slate-800 border border-slate-600 rounded-2xl p-2 focus-within:border-blue-500 transition">
+
+                <input id="question"
+                       type="text"
+                       placeholder="Posez une question à Bank AI..."
+                       autocomplete="off"
+                       required
+                       class="flex-1 min-w-0 bg-transparent text-white placeholder-slate-400 px-4 py-3 outline-none text-sm">
+
+                <button id="sendButton"
+                        type="submit"
+                        class="w-11 h-11 shrink-0 rounded-xl bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center transition">
+
+                    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+
+                </button>
+
+            </form>
+
+            <p class="text-center text-slate-500 text-xs mt-3">
+                Propulsé par Groq · Spring AI · MCP
+            </p>
+
+        </div>
+
+    </section>
+
+    <!-- Markdown + protection contre les injections HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+
+    <script>
+        const form = document.getElementById("chatForm");
+        const input = document.getElementById("question");
+        const messages = document.getElementById("messages");
+        const sendButton = document.getElementById("sendButton");
+        const suggestions = document.getElementById("suggestions");
+
+        // Configure le rendu Markdown
+        marked.setOptions({
+            gfm: true,
+            breaks: true
+        });
+
+        // Ajoute un message dans la conversation
+        function ajouterMessage(texte, utilisateur = false) {
+
+            const ligne = document.createElement("div");
+            ligne.className = utilisateur
+                ? "flex justify-end"
+                : "flex justify-start";
+
+            const bulle = document.createElement("div");
+
+            bulle.className = utilisateur
+                ? "max-w-[85%] bg-blue-600 text-white rounded-2xl rounded-tr-sm px-5 py-4 text-sm whitespace-pre-wrap leading-relaxed"
+                : "max-w-[90%] min-w-0 bg-slate-800 border border-slate-700 text-slate-200 rounded-2xl rounded-tl-sm px-5 py-4 text-sm leading-relaxed";
+
+            // Toujours utiliser textContent pour les messages utilisateur
+            bulle.textContent = texte;
+
+            if (!utilisateur) {
+                bulle.classList.add("ai-content");
+            }
+
+            ligne.appendChild(bulle);
+            messages.appendChild(ligne);
+
+            messages.scrollTop = messages.scrollHeight;
+
+            return bulle;
+        }
+
+        // Affiche la réponse Markdown de l'IA
+        function afficherMarkdown(element, markdown) {
+
+            const html = DOMPurify.sanitize(marked.parse(markdown));
+            element.innerHTML = html;
+
+            // Rend les grands tableaux défilables horizontalement
+            element.querySelectorAll("table").forEach(table => {
+
+                const wrapper = document.createElement("div");
+                wrapper.className = "overflow-x-auto max-w-full my-4 rounded-xl";
+
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+            });
+
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // Envoie la question à notre API Spring Boot
+        form.addEventListener("submit", async (event) => {
+
+            event.preventDefault();
+
+            const question = input.value.trim();
+            if (!question) return;
+
+            ajouterMessage(question, true);
+
+            input.value = "";
+            suggestions.classList.add("hidden");
+
+            sendButton.disabled = true;
+            sendButton.classList.add("opacity-50");
+
+            const reponse = ajouterMessage("Bank AI réfléchit...");
+
+            try {
+
+                const response = await fetch(
+                    `/ai/ask?question=${encodeURIComponent(question)}`
+                );
+
+                if (!response.ok) {
+                    throw new Error("Erreur HTTP " + response.status);
+                }
+
+                const markdown = await response.text();
+
+                afficherMarkdown(reponse, markdown);
+
+            } catch (error) {
+
+                reponse.textContent = "Impossible de contacter l'assistant IA.";
+
+            } finally {
+
+                sendButton.disabled = false;
+                sendButton.classList.remove("opacity-50");
+
+                input.focus();
+            }
+
+            messages.scrollTop = messages.scrollHeight;
+        });
+
+        // Questions suggérées
+        document.querySelectorAll(".suggestion").forEach(button => {
+
+            button.addEventListener("click", () => {
+
+                input.value = button.dataset.question;
+                form.requestSubmit();
+
+            });
+        });
+    </script>
+
+</main>
+</body>
+</html>
